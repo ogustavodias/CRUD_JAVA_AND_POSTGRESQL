@@ -1,31 +1,33 @@
 package test;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.Assert;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
-import main.db.PostgreSQLConnection;
+import main.db.CustomerDAO;
+import main.db.ICustomerDAO;
+import main.domain.Customer;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CustomerTest {
 
-  private Connection connection;
+  private ICustomerDAO dao = new CustomerDAO();
 
-  @Before
-  public void start() {
-    this.connection = PostgreSQLConnection.getConnection();
+  @Test
+  public void register() throws SQLException {
+    Customer customer = new Customer("48587815857", "Gustavo Alves Dias");
+    Assert.assertTrue(dao.register(customer) > 0);
   }
 
   @Test
-  public void register() {
-
+  public void search() throws SQLException {
+    Customer customerDB = dao.search("48587815857");
+    Assert.assertNotNull(customerDB);
+    Assert.assertEquals(customerDB.getCpf(), "48587815857");
   }
 
-  @After
-  public void end() throws SQLException {
-    this.connection.close();
-  }
-
+  
 }
