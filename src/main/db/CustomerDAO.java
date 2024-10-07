@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import main.domain.Customer;
 
@@ -56,6 +58,69 @@ public class CustomerDAO implements ICustomerDAO {
     }
 
     return customer;
+  }
+
+  @Override
+  public List<Customer> searchAll() throws SQLException {
+    List<Customer> customerList = new ArrayList<>();
+
+    try {
+      String sql = "SELECT * FROM customer";
+      this.connection = PostgreSQLConnection.getConnection();
+      this.stm = this.connection.prepareStatement(sql);
+      this.rs = this.stm.executeQuery();
+
+      while (rs.next()) {
+        Customer customerDB = new Customer(this.rs.getString("cpf"), this.rs.getString("nome"));
+        customerList.add(customerDB);
+      }
+
+    } catch (SQLException e) {
+      throw e;
+    } finally {
+      closeConnection();
+    }
+
+    return customerList;
+  }
+
+  @Override
+  public int updateCustomer(Customer customer) throws SQLException {
+    int affectedRows = 0;
+
+    try {
+      String sql = "UPDATE customer SET nome = ? WHERE cpf = ?";
+      this.connection = PostgreSQLConnection.getConnection();
+      this.stm = this.connection.prepareStatement(sql);
+      this.stm.setString(1, customer.getNome());
+      this.stm.setString(2, customer.getCpf());
+      affectedRows = this.stm.executeUpdate();
+    } catch (SQLException e) {
+      throw e;
+    } finally {
+      closeConnection();
+    }
+
+    return affectedRows;
+  }
+
+  @Override
+  public int deleteCustomer(String cpf) throws SQLException {
+    int affectedRows = 0;
+
+    try {
+      String sql = "DELETE FROM customer WHERE cpf = ?";
+      this.connection = PostgreSQLConnection.getConnection();
+      this.stm = this.connection.prepareStatement(sql);
+      this.stm.setString(1, cpf);
+      affectedRows = this.stm.executeUpdate();
+    } catch (SQLException e) {
+      throw e;
+    } finally {
+      closeConnection();
+    }
+
+    return affectedRows;
   }
 
   public void closeConnection() throws SQLException {
